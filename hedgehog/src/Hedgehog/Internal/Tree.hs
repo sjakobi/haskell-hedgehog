@@ -137,7 +137,7 @@ instance Monad m => Monad (Tree m) where
     Tree $ do
       Node x xs <- runTree m
       Node y ys <- runTree (k x)
-      pure . Node y $
+      pure . Node y $!
         fmap (>>= k) xs ++ ys
 
 instance MonadPlus m => Alternative (Tree m) where
