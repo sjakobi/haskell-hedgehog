@@ -108,20 +108,20 @@ instance Functor m => Functor (Tree m) where
     Tree . fmap (fmap f) . runTree
 
 instance Monad m => Applicative (Node m) where
-  pure =
-    return
+  pure x =
+    Node x []
   (<*>) =
-    ap
+    ap -- TODO
 
 instance Monad m => Applicative (Tree m) where
   pure =
-    return
+    Tree . pure . pure
   (<*>) =
-    ap
+    ap -- TODO
 
 instance Monad m => Monad (Node m) where
-  return x =
-    Node x []
+  return =
+    pure
 
   (>>=) (Node x xs) k =
     case k x of
@@ -130,8 +130,8 @@ instance Monad m => Monad (Node m) where
           fmap (Tree . fmap (>>= k) . runTree) xs ++ ys
 
 instance Monad m => Monad (Tree m) where
-  return x =
-    Tree . pure $ Node x []
+  return =
+    pure
 
   (>>=) m k =
     Tree $ do
