@@ -110,8 +110,8 @@ instance Functor m => Functor (Tree m) where
 instance Monad m => Applicative (Node m) where
   pure x =
     Node x []
-  (<*>) =
-    ap -- TODO
+  (<*>) (Node fab fabs) n@(Node fa fas) =
+    Node (fab fa) (map (fmap fab) fabs ++ map (<*> n) fabs)
 
 instance Monad m => Applicative (Tree m) where
   pure =
