@@ -22,7 +22,7 @@ module Hedgehog.Internal.Tree (
   ) where
 
 import           Control.Applicative (Alternative(..))
-import           Control.Monad (MonadPlus(..), ap, join)
+import           Control.Monad (MonadPlus(..), join)
 import           Control.Monad.Base (MonadBase(..))
 import           Control.Monad.Catch (MonadThrow(..), MonadCatch(..), Exception)
 import           Control.Monad.Error.Class (MonadError(..))
@@ -107,17 +107,19 @@ instance Functor m => Functor (Tree m) where
   fmap f =
     Tree . fmap (fmap f) . runTree
 
-instance Monad m => Applicative (Node m) where
+instance Applicative m => Applicative (Node m) where
   pure x =
     Node x []
-  (<*>) (Node fab fabs) n@(Node fa fas) =
-    Node (fab fa) (map (fmap fab) fabs ++ map (<*> n) fabs)
+  (<*>) (Node ab tabs) na@(Node a tas) =
+    Node (ab a) $
+      map (fmap ab) tas ++ map (<*> (fromNode na)) tabs
 
-instance Monad m => Applicative (Tree m) where
+instance Applicative m => Applicative (Tree m) where
   pure =
     Tree . pure . pure
-  (<*>) =
-    ap -- TODO
+  (<*>) (Tree mab) (Tree ma) =
+    Tree $
+      (\nab na -> nab <*> na) <$> mab <*> ma
 
 instance Monad m => Monad (Node m) where
   return =

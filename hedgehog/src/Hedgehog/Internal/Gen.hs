@@ -528,7 +528,7 @@ instance (Monad m, Semigroup a) => Semigroup (GenT m a) where
   (<>) = liftA2 (Semigroup.<>)
 
 instance (Monad m, Monoid a) => Monoid (GenT m a) where
-  mappend = (<>)
+  mappend = liftA2 mappend
   mempty = return mempty
 
 instance Functor m => Functor (GenT m) where

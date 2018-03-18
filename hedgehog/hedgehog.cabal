@@ -78,7 +78,7 @@ library
       unix                            >= 2.6        && < 2.8
 
   ghc-options:
-    -Wall -Wcompat -Wnoncanonical-monad-instances
+    -Wall -Wnoncanonical-monad-instances
 
   hs-source-dirs:
     src
