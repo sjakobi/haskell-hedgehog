@@ -21,7 +21,7 @@ module Hedgehog.Internal.Tree (
   , render
   ) where
 
-import           Control.Applicative (Alternative(..))
+import           Control.Applicative (Alternative(..), liftA2)
 import           Control.Monad (MonadPlus(..), join)
 import           Control.Monad.Base (MonadBase(..))
 import           Control.Monad.Catch (MonadThrow(..), MonadCatch(..), Exception)
@@ -119,7 +119,7 @@ instance Applicative m => Applicative (Tree m) where
     Tree . pure . pure
   (<*>) (Tree mab) (Tree ma) =
     Tree $
-      (\nab na -> nab <*> na) <$> mab <*> ma
+      liftA2 (<*>) mab ma
 
 instance Monad m => Monad (Node m) where
   return =
