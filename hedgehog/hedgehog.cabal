@@ -146,7 +146,7 @@ test-suite internals
     internals.hs
 
   ghc-options:
-    -Wall -threaded -O2
+    -Wall -threaded -O2 -fno-warn-orphans
 
   hs-source-dirs:
     test

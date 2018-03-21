@@ -1,36 +1,43 @@
 {-# language GeneralizedNewtypeDeriving #-}
 module Main where
 
-import Control.Applicative
-import Data.Maybe
-import Data.Word
+import Data.Functor.Classes
 import Hedgehog.Internal.Tree
 import Test.QuickCheck.Classes
 import Test.QuickCheck.Checkers
 import Test.QuickCheck
 
-main = verboseBatch (monad (undefined :: MaybeTree (Bool, Bool, Bool)))
+main :: IO ()
+main = do
+  verboseBatch ("Node", concatMap unbatch
+    [ applicative (undefined :: Node Maybe (Bool, Char, Int))
+    , monad (undefined :: Node Maybe (Int, Bool, Char))
+    , monadApplicative (undefined :: Node (Either Int) (Char, Bool))
+    ])
+  verboseBatch ("Node", concatMap unbatch
+    [ applicative (undefined :: Tree Maybe (Bool, Char, Int))
+    , monad (undefined :: Tree Maybe (Bool, Char, Int))
+    , monadApplicative (undefined :: Tree (Either Int) (Char, Bool))
+    ])
 
-newtype MaybeTree a = MaybeTree { unMaybeTree :: Tree Maybe a }
-  deriving (Show, Functor, Applicative, Monad)
+instance (Eq1 m, Eq a) => Eq (Tree m a) where
+  Tree m0 == Tree m1 = liftEq (==) m0 m1
 
-instance Arbitrary a => Arbitrary (MaybeTree a)
-  where arbitrary = MaybeTree . Tree . fmap unMaybeNode <$> arbitrary
+instance (Eq1 m, Eq a) => EqProp (Tree m a) where
+  (=-=) = eq
 
-instance Eq a => Eq (MaybeTree a)
-  where MaybeTree (Tree m0) == MaybeTree (Tree m1) = (MaybeNode <$> m0) == (MaybeNode <$> m1)
+instance (Arbitrary1 m, Arbitrary a) => Arbitrary (Tree m a)
+  where arbitrary = Tree <$> arbitrary1
 
-instance (Eq a, EqProp a) => EqProp (MaybeTree a)
-  where (=-=) = eq
+instance (Eq1 m, Eq a) => Eq (Node m a) where
+  Node a0 ts0 == Node a1 ts1 = a0 == a1 && ts0 == ts1
 
-newtype MaybeNode a = MaybeNode { unMaybeNode :: Node Maybe a }
-  deriving (Show, Functor, Applicative, Monad)
+instance (Eq1 m, Eq a) => EqProp (Node m a) where
+  (=-=) = eq
 
-instance Arbitrary a => Arbitrary (MaybeNode a)
+instance (Arbitrary1 m, Arbitrary a) => Arbitrary (Node m a)
   where arbitrary = do
           a <- arbitrary
-          trees <- fmap unMaybeTree . maybeToList <$> arbitrary -- TODO: The lists may be a bit larger
-          return $ MaybeNode (Node a trees)
-
-instance Eq a => Eq (MaybeNode a)
-  where MaybeNode (Node a0 ts0) == MaybeNode (Node a1 ts1) = a0 == a1 && (MaybeTree <$> ts0) == (MaybeTree <$> ts1)
+          n <- choose (0, 2)
+          trees <- vector n
+          return $ (Node a trees)

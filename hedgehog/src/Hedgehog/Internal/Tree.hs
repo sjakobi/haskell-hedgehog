@@ -112,7 +112,7 @@ instance Applicative m => Applicative (Node m) where
     Node x []
   (<*>) (Node ab tabs) na@(Node a tas) =
     Node (ab a) $
-      map (fmap ab) tas ++ map (<*> (fromNode na)) tabs
+      map (<*> (fromNode na)) tabs ++ map (fmap ab) tas 
 
 instance Applicative m => Applicative (Tree m) where
   pure =
