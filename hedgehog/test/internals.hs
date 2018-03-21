@@ -2,6 +2,9 @@
 module Main where
 
 import Data.Functor.Classes
+import Hedgehog.Internal.Gen
+import Hedgehog.Internal.Range
+import Hedgehog.Internal.Seed
 import Hedgehog.Internal.Tree
 import Test.QuickCheck.Classes
 import Test.QuickCheck.Checkers
@@ -41,3 +44,12 @@ instance (Arbitrary1 m, Arbitrary a) => Arbitrary (Node m a)
           n <- choose (0, 2)
           trees <- vector n
           return $ (Node a trees)
+
+instance CoArbitrary Size
+  where coarbitrary = coarbitraryIntegral
+
+instance CoArbitrary Seed where
+  coarbitrary (Seed
+
+instance Arbitrary (GenT m a)
+  where arbitrary = GenT <$> arbitrary
